@@ -142,11 +142,15 @@ pub mod time {
         where
             S: Serializer,
         {
-            let ts = dt.unix_timestamp();
+            if serializer.is_human_readable() {
+                dt.to_string().serialize(serializer)
+            } else {
+                let ts = dt.unix_timestamp();
 
-            u32::try_from(ts)
-                .map_err(|_| S::Error::custom(format!("{dt} cannot be represented as DateTime")))?
-                .serialize(serializer)
+                u32::try_from(ts)
+                    .map_err(|_| S::Error::custom(format!("{dt} cannot be represented as DateTime")))?
+                    .serialize(serializer)
+            }
         }
 
         pub fn deserialize<'de, D>(deserializer: D) -> Result<OffsetDateTime, D::Error>
