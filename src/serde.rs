@@ -266,11 +266,15 @@ pub mod time {
         where
             S: Serializer,
         {
-            let ts = dt.unix_timestamp_nanos() / div;
+            if serializer.is_human_readable() {
+                dt.to_string().serialize(serializer)
+            } else {
+                let ts = dt.unix_timestamp_nanos() / div;
 
-            i64::try_from(ts)
-                .map_err(|_| S::Error::custom(format!("{dt} cannot be represented as DateTime64")))?
-                .serialize(serializer)
+                i64::try_from(ts)
+                    .map_err(|_| S::Error::custom(format!("{dt} cannot be represented as DateTime64")))?
+                    .serialize(serializer)
+            }
         }
 
         fn do_deserialize<'de, D>(deserializer: D, mul: i128) -> Result<OffsetDateTime, D::Error>
